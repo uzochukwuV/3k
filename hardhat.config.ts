@@ -1,5 +1,8 @@
 import type { HardhatUserConfig } from "hardhat/config";
 import toolbox from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
+import path from "node:path";
+
+const SOLCJS_PATH = path.join(process.cwd(), "node_modules/solc/soljson.js");
 
 const config: HardhatUserConfig = {
   paths: {
@@ -11,8 +14,10 @@ const config: HardhatUserConfig = {
     compilers: [
       {
         version: "0.8.28",
+        path: SOLCJS_PATH,
+        preferWasm: true,
         settings: {
-          evmVersion: "paris",
+          evmVersion: "cancun",
           optimizer: {
             enabled: true,
             runs: 200

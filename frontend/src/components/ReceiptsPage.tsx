@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Copy, CheckCircle, XCircle, ArrowUpRight, ArrowDownRight, Search, Filter, Download, History } from 'lucide-react'
+import { apiRequest } from '../lib/api'
+import { useWallet } from '../context/WalletContext'
 
 interface PaymentReceipt {
   id: string
@@ -14,6 +16,7 @@ interface PaymentReceipt {
 }
 
 export default function ReceiptsPage() {
+  const { address } = useWallet()
   const [receipts, setReceipts] = useState<PaymentReceipt[]>([])
   const [filteredReceipts, setFilteredReceipts] = useState<PaymentReceipt[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -21,58 +24,40 @@ export default function ReceiptsPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed' | 'failed'>('all')
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Mock data for demo - in real app, fetch from /api/payments?email=...
   useEffect(() => {
-    const mockData: PaymentReceipt[] = [
-      {
-        id: '1',
-        senderEmail: 'your.email@example.com',
-        recipientEmail: 'alice@qie.com',
-        amount: 150.00,
-        token: 'USDC',
-        status: 'completed',
-        transactionHash: '0x1234...abcd',
-        createdAt: '2026-04-29T18:30:00Z',
-        type: 'sent'
-      },
-      {
-        id: '2',
-        senderEmail: 'bob@qie.com',
-        recipientEmail: 'your.email@example.com',
-        amount: 75.50,
-        token: 'USDC',
-        status: 'completed',
-        transactionHash: '0x5678...efgh',
-        createdAt: '2026-04-29T16:45:00Z',
-        type: 'received'
-      },
-      {
-        id: '3',
-        senderEmail: 'your.email@example.com',
-        recipientEmail: 'charlie@qie.com',
-        amount: 200.00,
-        token: 'USDC',
-        status: 'pending',
-        createdAt: '2026-04-29T14:20:00Z',
-        type: 'sent'
-      },
-      {
-        id: '4',
-        senderEmail: 'david@qie.com',
-        recipientEmail: 'your.email@example.com',
-        amount: 30.00,
-        token: 'USDC',
-        status: 'confirmed',
-        transactionHash: '0x9abc...def0',
-        createdAt: '2026-04-29T12:00:00Z',
-        type: 'received'
-      }
-    ]
+    if (!address) return
+    const key = `qie_email_${address.toLowerCase()}`
+    const email = localStorage.getItem(key)
+    if (!email) {
+      setReceipts([])
+      setFilteredReceipts([])
+      setIsLoading(false)
+      return
+    }
 
-    setReceipts(mockData)
-    setFilteredReceipts(mockData)
-    setIsLoading(false)
-  }, [])
+    setIsLoading(true)
+    apiRequest<{ success: true; data: Array<any> }>(`/api/payments/payments?email=${encodeURIComponent(email)}`, { method: 'GET' })
+      .then((r) => {
+        const list = (r.data ?? []).map((p) => ({
+          id: String(p.id),
+          senderEmail: String(p.senderEmail),
+          recipientEmail: String(p.recipientEmail),
+          amount: Number(p.amount),
+          token: String(p.token),
+          status: String(p.status) as any,
+          transactionHash: p.transactionHash ? String(p.transactionHash) : undefined,
+          createdAt: String(p.createdAt),
+          type: String(p.senderEmail).toLowerCase() === email.toLowerCase() ? 'sent' : 'received',
+        })) as PaymentReceipt[]
+        setReceipts(list)
+        setFilteredReceipts(list)
+      })
+      .catch(() => {
+        setReceipts([])
+        setFilteredReceipts([])
+      })
+      .finally(() => setIsLoading(false))
+  }, [address])
 
   // Apply filters
   useEffect(() => {

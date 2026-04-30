@@ -120,6 +120,66 @@ router.get('/resolve/:email', (req, res) => {
   });
 });
 
+router.get('/resolve-wallet/:walletAddress', (req, res) => {
+  const { walletAddress } = req.params;
+
+  if (!walletAddress) {
+    return res.status(400).json({ error: "Wallet address is required" });
+  }
+
+  const walletKey = walletAddress.toLowerCase();
+
+  db.get('SELECT * FROM users WHERE wallet_address = ?', [walletKey], (err, userRecord) => {
+    if (err) {
+      return res.status(500).json({ error: "Database error: " + err.message });
+    }
+
+    if (!userRecord) {
+      return res.status(404).json({ error: "No user found for this wallet address." });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        id: userRecord.id,
+        email: userRecord.email,
+        walletAddress: userRecord.wallet_address,
+        routerAddress: userRecord.router_address,
+        registeredAt: userRecord.created_at
+      }
+    });
+  });
+});
+
+router.post('/update-router', (req, res) => {
+  const { email, walletAddress, routerAddress } = req.body;
+
+  if ((!email && !walletAddress) || !routerAddress) {
+    return res.status(400).json({ error: "email or walletAddress and routerAddress are required" });
+  }
+
+  const routerKey = routerAddress.toLowerCase();
+  const emailKey = email ? String(email).toLowerCase() : null;
+  const walletKey = walletAddress ? String(walletAddress).toLowerCase() : null;
+
+  const where = emailKey ? 'email = ?' : 'wallet_address = ?';
+  const value = emailKey ?? walletKey;
+
+  db.run(
+    `UPDATE users SET router_address = ? WHERE ${where}`,
+    [routerKey, value],
+    function(err) {
+      if (err) {
+        return res.status(500).json({ error: "Database error: " + err.message });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ success: true, routerAddress: routerKey });
+    }
+  );
+});
+
 /**
  * Generate a payment payload with QR code for sending funds to an email.
  */

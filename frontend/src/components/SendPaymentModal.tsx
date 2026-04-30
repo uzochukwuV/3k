@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { X, Send, Mail, CreditCard, FileText, Copy, CheckCircle, QrCode as QrCodeIcon, XCircle, ArrowLeft, QrCode } from 'lucide-react'
+import { X, Send, Mail, FileText, Copy, CheckCircle, XCircle, ArrowLeft, QrCode } from 'lucide-react'
+import { apiRequest } from '../lib/api'
 
 
 interface SendPaymentModalProps {
   isOpen: boolean
   onClose: () => void
   defaultRecipient?: string
+  senderEmail?: string
   onSend?: (data: any) => Promise<void>
 }
 
@@ -21,6 +23,7 @@ export default function SendPaymentModal({
   isOpen, 
   onClose, 
   defaultRecipient = '',
+  senderEmail,
   onSend 
 }: SendPaymentModalProps) {
   const [form, setForm] = useState<PaymentForm>({
@@ -58,14 +61,11 @@ export default function SendPaymentModal({
     setError('')
     
     try {
-      const response = await fetch(`/api/payments/resolve/${encodeURIComponent(email)}`)
-      if (response.ok) {
-        const data = await response.json()
-        setForm(prev => ({ ...prev, recipientAddress: data.data.walletAddress }))
-      } else {
-        const stubAddress = '0x' + Buffer.from(email).toString('hex').slice(0, 40)
-        setForm(prev => ({ ...prev, recipientAddress: stubAddress }))
-      }
+      const data = await apiRequest<{ success: true; data: { walletAddress: string } }>(
+        `/api/payments/resolve/${encodeURIComponent(email)}`,
+        { method: 'GET' },
+      )
+      setForm(prev => ({ ...prev, recipientAddress: data.data.walletAddress }))
     } catch (err) {
       const stubAddress = '0x' + Buffer.from(email).toString('hex').slice(0, 40)
       setForm(prev => ({ ...prev, recipientAddress: stubAddress }))
@@ -93,7 +93,7 @@ export default function SendPaymentModal({
 
     try {
       const paymentData = {
-        senderEmail: 'current@example.com',
+        senderEmail: senderEmail || 'current@example.com',
         recipientEmail: form.recipientEmail || '',
         recipientAddress: form.recipientAddress,
         amount: amount,
@@ -101,26 +101,18 @@ export default function SendPaymentModal({
         memo: form.memo
       }
 
-      const response = await fetch('/api/payments', {
+      const result = await apiRequest<any>('/api/payments/payments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(paymentData)
-      })
-
-      let result
-      if (response.ok) {
-        result = await response.json()
-      } else {
-        result = {
-          success: true,
-          data: {
-            id: Date.now().toString(),
-            qrCode: null
-          }
+      }).catch(() => ({
+        success: true,
+        data: {
+          id: Date.now().toString(),
+          qrCode: null
         }
-      }
+      }))
 
-      setPaymentId(result.data.id)
+      setPaymentId(result.data.id as string)
 
       const qrPayload = {
         type: 'qie_payment',

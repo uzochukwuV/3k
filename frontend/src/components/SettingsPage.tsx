@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Zap, TrendingUp, Lock, CheckCircle, ArrowLeft, Save, Settings, AlertCircle } from 'lucide-react'
+import { Zap, TrendingUp, Lock, CheckCircle, Save, Settings, AlertCircle } from 'lucide-react'
 
 interface RouterConfig {
   operatingPct: number

@@ -1,0 +1,17 @@
+{
+  "chainId": 1983,
+  "rpcUrl": "https://rpc1testnet.qie.digital",
+  "deployer": "0x02ddcC5DC09BA18846D06e879Be95780e95EABF4",
+  "contracts": {
+    "mockQusdc": "0x717238893Fc75d263322694201940Da27064d565",
+    "mockCToken": "0x08F223243A024eF7eEf5375b316e534C66B3e4c8",
+    "qusdcAdapter": "0x4Cb724434430e5B8a484088021570e64CB7315e6",
+    "smartRouterImpl": "0x9eB00a54d5BC2508E4a7809CEAdDe1f537DD7fa2",
+    "routerFactory": "0x46F5081a54AbB286E2da52483B53135c74b9BE3a",
+    "jackpot": "0xda46Af69C4d450a20560De1462285A15Ed398a6A"
+  },
+  "txs": {
+    "whitelistVault": "0xca147d756f730c3f34ddffc70c213d554dda83892260ec5bc9f667f7c836811a",
+    "mintMockQusdc": "0x032a13382ef1042c792eb40c47e7b87266a11c0e42e25c1bccc110b960d22918"
+  }
+}

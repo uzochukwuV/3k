@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
 interface WalletContextType {
   address: string | null
@@ -10,17 +10,17 @@ interface WalletContextType {
   switchNetwork: () => Promise<void>
 }
 
-const QIE_CHAIN_ID = 1990
+const QIE_CHAIN_ID = Number(((import.meta as any).env?.VITE_CHAIN_ID as string | undefined) ?? 1983)
 const QIE_NETWORK_CONFIG = {
   chainId: `0x${QIE_CHAIN_ID.toString(16)}`,
-  chainName: 'QIE Network',
+  chainName: (((import.meta as any).env?.VITE_CHAIN_NAME as string | undefined) ?? 'QIE Testnet') as string,
   nativeCurrency: {
     name: 'QIE',
     symbol: 'QIE',
     decimals: 18,
   },
-  rpcUrls: ['https://rpc.qiblockchain.online'],
-  blockExplorerUrls: ['https://explorer.qiblockchain.online'],
+  rpcUrls: [(((import.meta as any).env?.VITE_RPC_URL as string | undefined) ?? 'https://rpc1testnet.qie.digital') as string],
+  blockExplorerUrls: [(((import.meta as any).env?.VITE_EXPLORER_URL as string | undefined) ?? 'https://explorer.qiblockchain.online') as string],
 }
 
 const WalletContext = createContext<WalletContextType | null>(null)
@@ -34,22 +34,24 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window.ethereum !== 'undefined') {
-      window.ethereum.request({ method: 'eth_accounts' }).then((accounts: string[]) => {
-        if (accounts.length > 0) {
-          setAddress(accounts[0])
+      window.ethereum.request({ method: 'eth_accounts' }).then((accounts) => {
+        const a = accounts as string[]
+        if (a.length > 0) {
+          setAddress(a[0])
         }
       })
 
-      window.ethereum.request({ method: 'eth_chainId' }).then((chainIdHex: string) => {
-        setChainId(parseInt(chainIdHex, 16))
+      window.ethereum.request({ method: 'eth_chainId' }).then((chainIdHex) => {
+        setChainId(parseInt(chainIdHex as string, 16))
       })
 
-      window.ethereum.on('accountsChanged', (accounts: string[]) => {
-        setAddress(accounts.length > 0 ? accounts[0] : null)
+      window.ethereum.on('accountsChanged', (...args: unknown[]) => {
+        const a = (args[0] as string[]) ?? []
+        setAddress(a.length > 0 ? a[0] : null)
       })
 
-      window.ethereum.on('chainChanged', (chainIdHex: string) => {
-        setChainId(parseInt(chainIdHex, 16))
+      window.ethereum.on('chainChanged', (...args: unknown[]) => {
+        setChainId(parseInt(args[0] as string, 16))
       })
     }
   }, [])
@@ -62,10 +64,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     setIsConnecting(true)
     try {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      setAddress(accounts[0])
+      const accounts = (await window.ethereum.request({ method: 'eth_requestAccounts' })) as string[]
+      setAddress(accounts[0] ?? null)
 
-      const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' })
+      const chainIdHex = (await window.ethereum.request({ method: 'eth_chainId' })) as string
       setChainId(parseInt(chainIdHex, 16))
     } catch (err) {
       console.error('Failed to connect:', err)

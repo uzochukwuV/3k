@@ -8,10 +8,11 @@ function App() {
     <WalletProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<PaymentDashboard />} />
+          <Route path="/" element={<PaymentDashboard initialActive="dashboard" />} />
           <Route path="/dashboard" element={<PaymentDashboard />} />
-          <Route path="/receipts" element={<PaymentDashboard />} />
-          <Route path="/settings" element={<PaymentDashboard />} />
+          <Route path="/receipts" element={<PaymentDashboard initialActive="receipts" />} />
+          <Route path="/settings" element={<PaymentDashboard initialActive="settings" />} />
+          <Route path="/jackpot" element={<PaymentDashboard initialActive="jackpot" />} />
           <Route path="/pay/:routerAddress" element={<PaymentFlow />} />
         </Routes>
       </BrowserRouter>

@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection URI
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://vicezealor_db_user:bQHNL5fFkLKSgAxO@cluster0.ucm88sl.mongodb.net/?appName=Cluster0';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // Database and collections
 let db = null;
@@ -21,6 +21,10 @@ let usersCollection = null;
 let paymentsCollection = null;
 
 async function connectDB() {
+  if (!MONGODB_URI) {
+    console.log('ℹ️  MONGODB_URI not set; starting without MongoDB');
+    return;
+  }
   try {
     const client = new MongoClient(MONGODB_URI, {
       useNewUrlParser: true,
@@ -51,8 +55,7 @@ async function connectDB() {
 
   } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
-    console.error('Please ensure MongoDB Atlas connection string is correct in .env');
-    process.exit(1);
+    console.error('Continuing without MongoDB');
   }
 }
 

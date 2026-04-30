@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import { useWallet } from '../context/WalletContext'
-import { ArrowLeft, Loader2, ArrowRight, CreditCard, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Loader2, CreditCard, CheckCircle } from 'lucide-react'
 
 interface PaymentInfo {
   routerAddress: string
@@ -12,7 +12,7 @@ interface PaymentInfo {
 
 export default function PaymentFlow() {
   const { routerAddress } = useParams<{ routerAddress: string }>()
-  const { address, connect, isCorrectNetwork, switchNetwork, isConnecting } = useWallet()
+  const { address, connect, isCorrectNetwork, switchNetwork } = useWallet()
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

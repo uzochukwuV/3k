@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,opsz,wght@0,6..18,300;0,6..18,400;0,6..18,500;0,6..18,600;0,6..18,700;0,6..18,800;1,6..18,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,21 +9,59 @@ html {
 }
 
 body {
-  @apply bg-ink-950 text-ink-100 font-sans antialiased;
+  @apply bg-navy-950 text-slate-100 font-sans antialiased;
 }
 
+/* Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(48, 116, 253, 0.25) transparent;
+}
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(48, 116, 253, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(48, 116, 253, 0.4);
+}
+
+/* Range input styling */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+input[type='range']::-webkit-slider-runnable-track {
+  @apply h-1.5 rounded-full bg-navy-600;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  @apply h-4 w-4 rounded-full bg-brand-500 border-2 border-navy-900 shadow cursor-pointer;
+  margin-top: -5px;
+}
+input[type='range']::-moz-range-track {
+  @apply h-1.5 rounded-full bg-navy-600;
+}
+input[type='range']::-moz-range-thumb {
+  @apply h-4 w-4 rounded-full bg-brand-500 border-2 border-navy-900 shadow cursor-pointer;
+  border: none;
+}
+
+/* Focus ring override */
+:focus-visible {
+  outline: 2px solid rgba(48, 116, 253, 0.6);
+  outline-offset: 2px;
+}
+
+/* Selection */
 ::selection {
-  background: rgba(255, 75, 0, 0.22);
-}
-
-.grain {
-  background-image: theme('backgroundImage.grain');
-  background-size: 160px 160px;
-  mix-blend-mode: overlay;
-  opacity: 0.65;
-  pointer-events: none;
-}
-
-.prose :where(a):not(:where([class~="not-prose"] *)) {
-  @apply text-flare-200 underline decoration-flare-500/40 underline-offset-4 hover:text-white hover:decoration-flare-400;
+  background: rgba(48, 116, 253, 0.3);
 }
